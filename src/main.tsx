@@ -4,7 +4,6 @@ import {
   BarChart3,
   BookOpen,
   Check,
-  ChevronRight,
   GraduationCap,
   Heart,
   RotateCcw,
@@ -151,50 +150,49 @@ function App() {
         </header>
 
         {view === 'learn' && (
-          <section className="learn-layout">
-            <div className="word-panel">
-              <div className="toolbar">
-                <label className="search-box">
-                  <Search size={17} />
-                  <input value={query} onChange={event => setQuery(event.target.value)} placeholder="搜索 word / 中文 / definition" />
-                </label>
-                <div className="category-row">
-                  {categories.map(item => (
-                    <button
-                      key={item.id}
-                      className={cx('chip', category === item.id && 'active')}
-                      data-tone={item.tone}
-                      onClick={() => setCategory(item.id)}
-                    >
-                      {item.label}
-                      <span>{item.id === 'all' ? basicWords.length : counts[item.id as CategoryId]}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="word-list">
-                {filteredWords.map(word => (
+          <section className="learn-board">
+            <div className="toolbar">
+              <label className="search-box">
+                <Search size={17} />
+                <input value={query} onChange={event => setQuery(event.target.value)} placeholder="搜索 word / 中文 / definition" />
+              </label>
+              <div className="category-row">
+                {categories.map(item => (
                   <button
-                    key={word.id}
-                    className={cx('word-row', selectedWord.id === word.id && 'active')}
-                    onClick={() => selectWord(word)}
+                    key={item.id}
+                    className={cx('chip', category === item.id && 'active')}
+                    data-tone={item.tone}
+                    onClick={() => setCategory(item.id)}
                   >
-                    <span>
-                      <b>{word.word}</b>
-                      <small>{word.chineseMeaning}</small>
-                    </span>
-                    {learnedSet.has(word.id) ? <Check size={16} /> : <ChevronRight size={16} />}
+                    {item.label}
+                    <span>{item.id === 'all' ? basicWords.length : counts[item.id as CategoryId]}</span>
                   </button>
                 ))}
               </div>
             </div>
-            <WordDetail
-              word={selectedWord}
-              learned={progress.learned.includes(selectedWord.id)}
-              favorite={progress.favorites.includes(selectedWord.id)}
-              onLearned={() => markLearned(selectedWord)}
-              onFavorite={() => toggleFavorite(selectedWord)}
-            />
+            <div className="learn-summary">
+              <span>{filteredWords.length} words</span>
+              <span>{category === 'all' ? 'All categories' : categories.find(item => item.id === category)?.label}</span>
+            </div>
+            <div className="word-card-grid">
+              {filteredWords.map((word, index) => (
+                <WordStudyCard
+                  key={word.id}
+                  word={word}
+                  index={index}
+                  learned={progress.learned.includes(word.id)}
+                  favorite={progress.favorites.includes(word.id)}
+                  onLearned={() => markLearned(word)}
+                  onFavorite={() => toggleFavorite(word)}
+                />
+              ))}
+              {filteredWords.length === 0 && (
+                <div className="empty-state">
+                  <b>No words found</b>
+                  <span>Try another search or category.</span>
+                </div>
+              )}
+            </div>
           </section>
         )}
 
@@ -275,6 +273,43 @@ function Stat({ label, value }: { label: string; value: string }) {
   return <div className="stat"><span>{label}</span><b>{value}</b></div>;
 }
 
+function WordStudyCard({ word, index, learned, favorite, onLearned, onFavorite }: {
+  word: BasicWord;
+  index: number;
+  learned: boolean;
+  favorite: boolean;
+  onLearned: () => void;
+  onFavorite: () => void;
+}) {
+  return (
+    <article
+      className={cx('study-card', learned && 'learned')}
+      data-category={word.category}
+      style={{ '--card-delay': `${Math.min(index % 18, 17) * 22}ms` } as React.CSSProperties}
+    >
+      <div className="study-card-top">
+        <span>{word.categoryLabel}</span>
+        <button className={cx('icon-button compact', favorite && 'active')} onClick={onFavorite} aria-label="Favorite">
+          <Heart size={17} />
+        </button>
+      </div>
+      <h3>{word.word}</h3>
+      <p className="study-meaning">{shortMeaning(word.chineseMeaning, 4)}</p>
+      <p className="study-definition">{word.englishDefinition}</p>
+      <div className="study-example">
+        <span>Example</span>
+        <p>{word.examples[0].en}</p>
+        <small>{word.examples[0].zh}</small>
+      </div>
+      <button className={cx('learn-toggle', learned && 'active')} onClick={onLearned}>
+        <Check size={16} />
+        {learned ? 'Learned' : 'Mark learned'}
+      </button>
+      {learned && <div className="learned-badge"><Check size={13} /> Done</div>}
+    </article>
+  );
+}
+
 function WordDetail({ word, learned, favorite, onLearned, onFavorite }: {
   word: BasicWord;
   learned: boolean;
@@ -282,6 +317,9 @@ function WordDetail({ word, learned, favorite, onLearned, onFavorite }: {
   onLearned: () => void;
   onFavorite: () => void;
 }) {
+  const primaryMeaning = shortMeaning(word.chineseMeaning, 4);
+  const extraMeaning = word.chineseMeaning.length > primaryMeaning.length ? word.chineseMeaning : '';
+
   return (
     <article className="detail-card" data-category={word.category}>
       <div className="detail-top">
@@ -291,7 +329,8 @@ function WordDetail({ word, learned, favorite, onLearned, onFavorite }: {
         </button>
       </div>
       <h3>{word.word}</h3>
-      <p className="zh-meaning">{word.chineseMeaning}</p>
+      <p className="zh-meaning">{primaryMeaning}</p>
+      {extraMeaning && <p className="zh-extra">{extraMeaning}</p>}
       <p className="en-definition">{word.englishDefinition}</p>
       <div className="example-block">
         <span>Example</span>
@@ -306,6 +345,15 @@ function WordDetail({ word, learned, favorite, onLearned, onFavorite }: {
       </div>
     </article>
   );
+}
+
+function shortMeaning(value: string, limit: number) {
+  const parts = value
+    .split(/[；;,，]/)
+    .map(part => part.trim())
+    .filter(Boolean);
+  const short = parts.slice(0, limit).join('，');
+  return short || value;
 }
 
 function Segmented({ value, onChange }: { value: QuizMode; onChange: (value: QuizMode) => void }) {
