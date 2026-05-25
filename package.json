@@ -2,6 +2,7 @@
   "name": "simple-english",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://myersguo.github.io/english/",
   "type": "module",
   "packageManager": "pnpm@9.7.1",
   "scripts": {

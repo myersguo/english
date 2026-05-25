@@ -2,6 +2,8 @@
 
 Offline-first Basic English learning app for Ogden's 850 core words. The same React/Vite codebase powers the H5/Web experience and the Capacitor Android/iOS shells.
 
+Web: https://myersguo.github.io/english/
+
 ## Features
 
 - 850 Basic English words grouped as Operations, General, Picturable, Qualities, and Opposites.
@@ -17,9 +19,12 @@ Offline-first Basic English learning app for Ogden's 850 core words. The same Re
 pnpm install
 pnpm run dev
 pnpm run build
+pnpm run build:pages
 pnpm run validate:data
 pnpm run generate:data
 ```
+
+`pnpm run build:pages` writes the GitHub Pages artifact to `publish/` with the `/english/` asset base.
 
 ## Native Shells
 
