@@ -1,0 +1,32 @@
+{
+  "name": "simple-english",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.7.1",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:pages": "tsc && vite build --base=/english/ --outDir publish",
+    "preview": "vite preview",
+    "generate:data": "node scripts/generate-basic-words.mjs",
+    "validate:data": "node scripts/validate-data.mjs",
+    "cap:sync": "pnpm run build && npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/ios": "^7.4.4",
+    "lucide-react": "^0.468.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.4",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  }
+}
